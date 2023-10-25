@@ -8,6 +8,10 @@ public record struct Coordinate(float Latitude, float Longitude)
 {
 	public readonly Coordinate GetCoordinate() => this;
 
+	public Coordinate(double latitude, double longitude) : this((float)latitude, (float)longitude) { }
+
+	public static implicit operator Coordinate(OsmSharp.Node node) => new(node.Latitude ?? 0, node.Longitude ?? 0);
+
 	public Coordinate(string coordData) : this(0, 0)
 	{
 		static float dmsToDec(string dms)
@@ -249,11 +253,22 @@ public record struct Coordinate(float Latitude, float Longitude)
 	}
 
 	public static Coordinate operator +(Coordinate left, Coordinate right) =>
-		new(left.Latitude + right.Latitude, left.Longitude + right.Longitude);
-
+		new(Math.Clamp(left.Latitude + right.Latitude, -90f, 90), Math.Clamp(left.Longitude + right.Longitude, -180f, 180));
 	public static Coordinate operator -(Coordinate left, Coordinate right) =>
-		new(left.Latitude - right.Latitude, left.Longitude - right.Longitude);
+		new(Math.Clamp(left.Latitude - right.Latitude, -90f, 90), Math.Clamp(left.Longitude - right.Longitude, -180f, 180));
 
+	public static Coordinate operator *(Coordinate left, float right) =>
+		new(Math.Clamp(left.Latitude * right, -90f, 90), Math.Clamp(left.Longitude * right, -180f, 180));
+	public static Coordinate operator /(Coordinate left, float right) =>
+		new(Math.Clamp(left.Latitude / right, -90f, 90), Math.Clamp(left.Longitude / right, -180f, 180));
+
+	public static implicit operator Coordinate(CIFPReader.Coordinate other) =>
+		new((float)other.Latitude, (float)other.Longitude);
+
+	public static implicit operator CIFPReader.Coordinate(Coordinate other) =>
+		new((decimal)other.Latitude, (decimal)other.Longitude);
+
+	public override readonly string ToString() => $"({Math.Round(Math.Abs(Latitude), 2)}, {Math.Round(Math.Abs(Longitude), 2)})";
 
 	public class CoordinateJsonConverter : JsonConverter<Coordinate>
 	{
@@ -287,4 +302,16 @@ public record struct Coordinate(float Latitude, float Longitude)
 public static class Extensions
 {
 	public static Coordinate ToCoordinate(this PointF point) => new(point.Y, point.X);
+
+	public static Coordinate Average(this IEnumerable<Coordinate> coordinates)
+	{
+		var cache = coordinates.Select(c => (c.Latitude, c.Longitude)).ToArray();
+		if (!cache.Any())
+			return new();
+
+		var tv = cache.Aggregate((s, i) => (s.Latitude + i.Latitude, s.Longitude + i.Longitude));
+		return new(tv.Latitude / cache.Length, tv.Longitude / cache.Length);
+	}
+
+	public static IEnumerable<Coordinate> ToCoordinates(this IEnumerable<OsmSharp.Node> nodes) => nodes.Select(n => (Coordinate)n);
 }

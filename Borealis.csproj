@@ -25,6 +25,7 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -46,7 +47,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="5.3.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+		<PackageReference Include="OsmSharp" Version="6.2.0" />
+		<PackageReference Include="OsmSharp.Geo" Version="6.2.0" />
+		<PackageReference Include="Simplify.NET" Version="1.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\TrainingServer\TrainingServer.Networking\TrainingServer.Networking.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="CIFPReader">
+	    <HintPath>..\TrainingServer\CIFPReader\bin\Release\net7.0\CIFPReader.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

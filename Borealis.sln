@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31611.283
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Borealis", "Borealis.csproj", "{FAFC6867-FD47-4A0C-AE3D-CE323934E3B6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrainingServer.Networking", "..\TrainingServer\TrainingServer.Networking\TrainingServer.Networking.csproj", "{BE88C420-5803-452C-9D78-BEA956D9C5F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{FAFC6867-FD47-4A0C-AE3D-CE323934E3B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAFC6867-FD47-4A0C-AE3D-CE323934E3B6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FAFC6867-FD47-4A0C-AE3D-CE323934E3B6}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{BE88C420-5803-452C-9D78-BEA956D9C5F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE88C420-5803-452C-9D78-BEA956D9C5F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE88C420-5803-452C-9D78-BEA956D9C5F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE88C420-5803-452C-9D78-BEA956D9C5F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

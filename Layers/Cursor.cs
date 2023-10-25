@@ -1,27 +1,49 @@
 ﻿using Borealis.Data;
 
+using System.Text.RegularExpressions;
+
 namespace Borealis.Layers;
-internal class Cursor : ILayer
+public class Cursor : ILayer
 {
-	public PointF Position { private get; set; }
+	public bool Active { get; set; } = true;
 
-	readonly Color _color;
+	public bool TopMost { get; protected set; } = false;
 
-	public Cursor(Color color) => _color = color;
+	public event Action? OnInvalidating;
 
-	public void Draw(Transformer canvas)
+	public IEnumerable<(string Name, Coordinate Centerpoint)> Find(Regex _) => Array.Empty<(string Name, Coordinate Centerpoint)>();
+
+	public bool Interact(PointF pos, Coordinate _2, ILayer.ClickType type)
+	{
+		if (!type.HasFlag(ILayer.ClickType.Hover))
+			return false;
+
+		Position = pos;
+		OnInvalidating?.Invoke();
+		return false;
+	}
+
+	public PointF Position { get; set; }
+
+	readonly Colorscheme _color;
+
+	public Cursor(Colorscheme color) => _color = color;
+
+	public void Draw(Transformer canvas, ICanvas originalCanvas)
 	{
 		float radius = 12;
 		PointF offset = new(10, -25);
 
-		canvas.FontColor = _color;
-		canvas.StrokeColor = _color;
+		canvas.FontSize = 12;
+		canvas.StrokeSize = 1;
+		canvas.FontColor = _color.Cursor;
+		canvas.StrokeColor = _color.Cursor;
 
-		canvas.DrawLine(canvas.LocalToWorldPoint(Position.Add(new(0, radius))), canvas.LocalToWorldPoint(Position.Add(new(radius, 0))));
-		canvas.DrawLine(canvas.LocalToWorldPoint(Position.Add(new(0, radius))), canvas.LocalToWorldPoint(Position.Add(new(-radius, 0))));
+		originalCanvas.DrawLine(Position.Add(new(0, radius)), Position.Add(new(radius, 0)));
+		originalCanvas.DrawLine(Position.Add(new(0, radius)), Position.Add(new(-radius, 0)));
 
-		canvas.DrawLine(canvas.LocalToWorldPoint(Position.Add(new(0, -radius))), canvas.LocalToWorldPoint(Position.Add(new(radius, 0))));
-		canvas.DrawLine(canvas.LocalToWorldPoint(Position.Add(new(0, -radius))), canvas.LocalToWorldPoint(Position.Add(new(-radius, 0))));
+		originalCanvas.DrawLine(Position.Add(new(0, -radius)), Position.Add(new(radius, 0)));
+		originalCanvas.DrawLine(Position.Add(new(0, -radius)), Position.Add(new(-radius, 0)));
 
 		Coordinate worldspace = canvas.LocalToWorldPoint(Position);
 		PointF boxpoint = Position.Add(offset);
