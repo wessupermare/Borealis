@@ -19,13 +19,25 @@ public class TrackHistory : ILayer
 	private readonly Queue<ImmutableHashSet<Coordinate>> _histories = new();
 	private readonly Color _color;
 
-	public TrackHistory(Whazzup whazzup)
+	public TrackHistory(NetworkConnection connection)
 	{
-		whazzup.OnCacheUpdated += ac => { _histories.Enqueue(ac.Select(a => a.Position).ToImmutableHashSet()); if (_histories.Count > 6) _histories.Dequeue(); };
 		_color = new(0, 0xCC, 0xFF);
 
-		if (!whazzup.IsMonitoring)
-			whazzup.BeginMonitoring();
+		_ = LoadHistoriesAsync(connection);
+	}
+
+	async Task LoadHistoriesAsync(NetworkConnection connection)
+	{
+		while (true)
+		{
+			if (connection.GetAircraft().Any())
+				_histories.Enqueue(connection.GetAircraft().Select(a => (Coordinate)a.Position.Position).ToImmutableHashSet());
+
+			if (_histories.Count > 6)
+				_histories.Dequeue();
+
+			await Task.Delay(TimeSpan.FromSeconds(5));
+		}
 	}
 
 	public void Draw(Transformer canvas, ICanvas originalCanvas)

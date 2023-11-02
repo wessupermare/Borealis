@@ -1,11 +1,11 @@
 ﻿using Borealis.Data;
 
-using Microsoft.UI.Xaml.Input;
-
 using System.Text.RegularExpressions;
 
+using KeyboardAccelerator = Microsoft.UI.Xaml.Input.KeyboardAccelerator;
+
 namespace Borealis.Layers;
-public class RangeRings : ILayer
+public class RangeRings(Colorscheme color) : ILayer
 {
 	public bool Active { get; set; } = true;
 
@@ -17,9 +17,7 @@ public class RangeRings : ILayer
 
 	public bool Interact(PointF _1, Coordinate _2, ILayer.ClickType _3) => false;
 
-	readonly Colorscheme _color;
-
-	public RangeRings(Colorscheme color) => _color = color;
+	readonly Colorscheme _color = color;
 
 	public KeyboardAccelerator GetAccelerator()
 	{

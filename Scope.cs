@@ -13,7 +13,7 @@ public class Scope : IDrawable, IList<ILayer>
 	public CIFP Cifp { get; set; }
 	public bool MagVarLocked { get; set; } = true;
 
-	readonly List<ILayer> _layers = new();
+	readonly List<ILayer> _layers = [];
 
 	public Scope() => Cifp = CIFP.Load(FileSystem.CacheDirectory);
 	public Scope(IEnumerable<ILayer> layers) : this() => _layers = new(layers);

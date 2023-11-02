@@ -53,7 +53,6 @@ public class Transformer : ICanvas
 
 	public Transformer(ICanvas canvas, RectF dirtyRect, Coordinate worldCenter, float scale, float rotation)
 	{
-
 		_canvas = canvas;
 		_dirtyRect = dirtyRect;
 		WorldScale = scale;

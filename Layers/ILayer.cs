@@ -7,11 +7,11 @@ using static Borealis.Layers.ILayer;
 namespace Borealis.Layers;
 public interface ILayer
 {
-	private static readonly string[] AllEndpoints = new[] {
+	private static readonly string[] AllEndpoints = [
 		"https://overpass-api.de/api/interpreter",
 		"https://overpass.kumi.systems/api/interpreter",
 		"https://maps.mail.ru/osm/tools/overpass/api/interpreter"
-	};
+	];
 
 	public static string OsmEndpoint => AllEndpoints[Random.Shared.Next(AllEndpoints.Length)];
 
@@ -39,7 +39,7 @@ public interface ILayer
 	}
 }
 
-public class Background : ILayer
+public class Background(Colorscheme fillColor) : ILayer
 {
 	public bool Active { get; set; } = true;
 
@@ -51,9 +51,7 @@ public class Background : ILayer
 
 	public bool Interact(PointF _1, Coordinate _2, ClickType _3) => false;
 
-	readonly Colorscheme _color;
-
-	public Background(Colorscheme fillColor) => _color = fillColor;
+	readonly Colorscheme _color = fillColor;
 
 	public void Draw(Transformer canvas, ICanvas _)
 	{
@@ -61,7 +59,7 @@ public class Background : ILayer
 		canvas.FillCanvas();
 
 		canvas.StrokeColor = _color.RangeRings;
-		canvas.StrokeDashPattern = new float[] { 30, 30 };
+		canvas.StrokeDashPattern = [30, 30];
 		Route negativeBoundary = new("World Boundary"),
 			  positiveBoundary = new("World Boundary");
 

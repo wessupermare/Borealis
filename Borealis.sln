@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Borealis", "Borealis.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrainingServer.Networking", "..\TrainingServer\TrainingServer.Networking\TrainingServer.Networking.csproj", "{BE88C420-5803-452C-9D78-BEA956D9C5F3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrainingServer.Extensibility", "..\TrainingServer\TrainingServer.Extensibility\TrainingServer.Extensibility.csproj", "{79DC0505-C532-4A28-A2AE-294D206D53F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{BE88C420-5803-452C-9D78-BEA956D9C5F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE88C420-5803-452C-9D78-BEA956D9C5F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE88C420-5803-452C-9D78-BEA956D9C5F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79DC0505-C532-4A28-A2AE-294D206D53F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79DC0505-C532-4A28-A2AE-294D206D53F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79DC0505-C532-4A28-A2AE-294D206D53F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79DC0505-C532-4A28-A2AE-294D206D53F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

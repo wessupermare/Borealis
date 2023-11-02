@@ -3,7 +3,7 @@
 using System.Text.RegularExpressions;
 
 namespace Borealis.Layers;
-public class Cursor : ILayer
+public class Cursor(Colorscheme color) : ILayer
 {
 	public bool Active { get; set; } = true;
 
@@ -13,21 +13,21 @@ public class Cursor : ILayer
 
 	public IEnumerable<(string Name, Coordinate Centerpoint)> Find(Regex _) => Array.Empty<(string Name, Coordinate Centerpoint)>();
 
-	public bool Interact(PointF pos, Coordinate _2, ILayer.ClickType type)
+	public bool Interact(PointF pos, Coordinate coord, ILayer.ClickType type)
 	{
 		if (!type.HasFlag(ILayer.ClickType.Hover))
 			return false;
 
 		Position = pos;
+		Coordinate = coord;
 		OnInvalidating?.Invoke();
 		return false;
 	}
 
 	public PointF Position { get; set; }
+	public Coordinate Coordinate { get; set; }
 
-	readonly Colorscheme _color;
-
-	public Cursor(Colorscheme color) => _color = color;
+	readonly Colorscheme _color = color;
 
 	public void Draw(Transformer canvas, ICanvas originalCanvas)
 	{

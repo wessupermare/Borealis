@@ -2,13 +2,10 @@
 
 using OsmSharp;
 using OsmSharp.Complete;
-using OsmSharp.Streams.Complete;
 
 using System.Collections.Concurrent;
-using System.Text.Json;
-using System.Text.Json.Nodes;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace Borealis.Layers;
 public class Airports : ILayer
@@ -38,11 +35,7 @@ public class Airports : ILayer
 		if (type != (ILayer.ClickType.Left | ILayer.ClickType.Single) || (_scope.LastTransform?.WorldScale ?? 0) < 0.0005f || _scope.LastTransform is not Transformer t)
 			return false;
 
-		if (Known.Select(ap => (ap, point.Distance(t.WorldToLocalPoint(_airports[ap]))))
-				.Where(i => i.Item2 < 20)
-				.OrderBy(i => i.Item2)
-				.Select(i => i.ap)
-				.FirstOrDefault() is not string selected)
+		if (CheckSelected(point) is not string selected)
 			return false;
 
 		if (_selected.TryGetValue(selected, out bool e))
@@ -55,6 +48,27 @@ public class Airports : ILayer
 		return true;
 	}
 
+	public string? CheckSelected(PointF point)
+	{
+		if ((_scope.LastTransform?.WorldScale ?? 0) < 0.0005f || _scope.LastTransform is not Transformer t)
+			return null;
+
+
+		return Known.Select(ap => (ap, point.Distance(t.WorldToLocalPoint(_airports[ap]))))
+				.Where(i => i.Item2 < 20)
+				.OrderBy(i => i.Item2)
+				.Select(i => i.ap)
+				.FirstOrDefault();
+	}
+
+	public ImmutableDictionary<string, Coordinate> GetAllVisible()
+	{
+		if ((_scope.LastTransform?.WorldScale ?? 0) < 0.0005f || _scope.LastTransform is not Transformer t)
+			return new Dictionary<string, Coordinate>().ToImmutableDictionary();
+
+		return Known.Where(ap => t.IsOnScreen(_airports[ap])).ToImmutableDictionary(ap => ap, ap => _airports[ap]);
+	}
+
 	public Airports(Colorscheme color, Scope scope, ICompleteOsmGeo[] source)
 	{
 		(_color, _scope) = (color, scope);
@@ -63,7 +77,6 @@ public class Airports : ILayer
 
 	async Task LoadDataAsync(Action<Coordinate> setCenter, ICompleteOsmGeo[] source)
 	{
-
 		var airports =
 			source
 				.AsParallel().AsUnordered()

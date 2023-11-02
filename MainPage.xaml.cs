@@ -4,7 +4,6 @@ using Borealis.Layers;
 using CommunityToolkit.Maui.Views;
 
 using Microsoft.UI.Input;
-using Microsoft.UI.Xaml.Input;
 
 using NetTopologySuite.Geometries;
 
@@ -17,9 +16,8 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-using TrainingServer.Networking;
-
 using CIFP = CIFPReader.CIFP;
+using KeyboardAccelerator = Microsoft.UI.Xaml.Input.KeyboardAccelerator;
 
 namespace Borealis;
 
@@ -37,10 +35,9 @@ public partial class MainPage : ContentPage
 
 	public MainPage()
 	{
-		string[] FIRs = new[] { "ZLA" };
+		string[] FIRs = ["ZLA"];
 
 		HttpClient http = new() { Timeout = TimeSpan.FromSeconds(5) };
-		Whazzup whazzup = new(http);
 		InitializeComponent();
 
 		Colorscheme colors = new(
@@ -89,10 +86,6 @@ public partial class MainPage : ContentPage
 		var allPoints = FIRs.Select(fir => (fir, artccBoundaryData.Where(l => l[0] == fir).Select(l => (new Coordinate($"{l[3][^1]}{l[3][..^1]}{l[4][^1]}{l[4][..^1]}"), FIRs.Contains(l[^1]) ? null : l[^1]))));
 		Route[] borders = allPoints.Select(v => new Route(v.fir, v.Item2.Append(v.Item2.First()).ToArray())).ToArray();
 
-		//Route[] borders = new[] { new Route("ZYZ") {
-		//	new(43.8535551f, -82.1821771f), new(43.616667f, -82.125f), new(43f, -82.416667f), new(42.870833f, -82.466667f), new(42.829167f, -81.970833f), new(42.741667f, -81.220833f), new(42.779167f, -80.895833f), new(42.836111f, -79.844444f), new(42.95f, -79.058333f), new(43.197778f, -79.024444f), new(43.433333f, -78.75f), new(43.6f, -78.75f), new(43.633333f, -78.677778f), new(43.633333f, -76.791667f), new(44.0920867f, -76.4449558f), new(44.132983f, -76.3531025f), new(44.1982678f, -76.3128233f), new(44.2025951f, -76.2806128f), new(44.2374402f, -76.1946212f), new(44.7460604f, -76.2180651f), new(44.8177388f, -75.7532896f), new(44.8827552f, -75.4569735f), new(44.919408f, -75.3556016f), new(44.9746148f, -75.2564903f), new(45.0370639f, -75.1778825f), new(45.1269118f, -75.1135206f), new(45.216442f, -75.061588f), new(45.3070421f, -75.0603553f), new(45.4076116f, -75.0674255f), new(45.6261141f, -75.1663307f), new(45.8360396f, -76.2665354f), new(44.7459997f, -76.2180209f), new(45.8360528f, -76.2665431f), new(45.962258f, -76.9246569f), new(46.1340524f, -77.2503741f), new(46.9457957f, -77.2486692f), new(47.1014999f, -77.5332956f), new(47.5524628f, -78.1101128f), new(47.8334142f, -78.5814722f), new(47.8014542f, -78.6519573f), new(47.7770911f, -78.7393138f), new(47.7659425f, -78.8045529f), new(47.7566202f, -78.8759371f), new(47.7550478f, -78.9572252f), new(47.7602193f, -79.0370498f), new(47.7730405f, -79.1205071f), new(47.7960015f, -79.2012457f), new(47.8179012f, -79.2655653f), new(47.8508474f, -79.329744f), new(47.8940184f, -79.397667f), new(47.9353344f, -79.4492038f), new(47.9936922f, -79.4993339f), new(48.0613549f, -79.5354486f), new(48.1221048f, -79.5538734f), new(48.1828125f, -79.5595596f), new(48.2412016f, -79.5535512f), new(48.2973978f, -79.534769f), new(48.3424491f, -79.5097112f), new(48.392492f, -79.4678397f), new(48.4415903f, -79.4156321f), new(48.4837856f, -79.3557349f), new(48.5190916f, -79.2907213f), new(48.542876f, -79.2272738f), new(48.5610315f, -79.1624344f), new(48.5757537f, -79.0989369f), new(48.584042f, -79.0031909f), new(49.0117032f, -79.0002904f), new(53.4621807f, -80.0015757f), new(49.9103328f, -84.1700779f), new(48.7804853f, -85.3469845f), new(47.0825668f, -86.9939808f), new(46.7507423f, -85.6335354f), new(46.3834612f, -84.5324857f), new(46.2499896f, -84.3571855f), new(45.8148608f, -83.5818105f), new(45.332982f, -82.4987071f), new(43.8535551f, -82.1821771f)
-		//}};
-
 		GvwScope.MoveHoverInteraction += GvwScope_MoveHoverInteraction;
 		GvwScope.StartInteraction += (_, _) => _isClickHeld = true;
 		GvwScope.EndInteraction += (_, _) => _isClickHeld = false;
@@ -125,7 +118,7 @@ public partial class MainPage : ContentPage
 	Cursor");
 
 		Assembly? assembly = null;
-		List<Type> layerTypes = new();
+		List<Type> layerTypes = [];
 		foreach (string l in File.ReadAllLines(layerConfig))
 		{
 			string line = l.Trim();
@@ -165,26 +158,31 @@ public partial class MainPage : ContentPage
 
 		ServerSelector selector = new(_scope, @"http://localhost:5031/");
 		_scope.Add(selector);
+		_scope.Add(colorEditor);
 
 		// Perform heavy loading on another thread so the main UI can spawn.
 		Task.Run(async () =>
 		{
-			PBFOsmStreamSource osmStream = new(File.OpenRead(@"C:\Users\westo\Downloads\aeroways.osm.pbf"));
-			OsmStreamSource borderedStream = osmStream.FilterSpatial(new Polygon(new LinearRing(borders.First().Select(p => new GeoAPI.Geometries.Coordinate(p.Point.Longitude, p.Point.Latitude)).Select(i => { colorEditor.IncrementLoadCount(); return i; }).ToArray())));
+			OsmCompleteStreamSource osmStream = await selector.GetOsmGeosAsync();
+			OsmEnumerableStreamSource simpleStream = new(osmStream.Select(ig => ig switch { OsmSharp.Node n => n, CompleteOsmGeo g => g.ToSimple(), _ => throw new NotImplementedException() }));
+			HashSet<ICompleteOsmGeo> boundedGeos = [];
+
+			foreach (var border in borders)
+			{
+				Polygon boundary = new(new LinearRing(border.Select(p => new GeoAPI.Geometries.Coordinate(p.Point.Longitude, p.Point.Latitude)).ToArray()));
+				boundedGeos.UnionWith(simpleStream.FilterSpatial(boundary, true).ToComplete().Select(i => { colorEditor.IncrementLoadCount(); return i; }));
+			}
 
 			Dictionary<Type, object[]> injectionItems = new() {
-				{ typeof(HttpClient), new[] { http } },
-				{ typeof(Whazzup), new[] { whazzup } },
-				{ typeof(CIFP), new[] { _cifp } },
-				{ typeof(Scope), new[] { _scope } },
+				{ typeof(HttpClient), [http] },
+				{ typeof(CIFP), [_cifp] },
+				{ typeof(Scope), [_scope] },
 				{ typeof(Route), borders },
 				{ typeof(Colorscheme), new object[] { colors, labelColors } },
-				{ typeof(OsmStreamSource), new[] { borderedStream, osmStream } },
-				{ typeof(OsmCompleteStreamSource), new[] { borderedStream.ToComplete(), osmStream.ToComplete() } },
-				{ typeof(NetworkConnection), new[] { selector.Connection } }
+				{ typeof(OsmCompleteStreamSource), [new OsmCompleteEnumerableStreamSource(boundedGeos), osmStream] },
+				{ typeof(NetworkConnection), [selector.Connection] },
+				{ typeof(ICompleteOsmGeo[]), new ICompleteOsmGeo[][] { [..boundedGeos] } }
 			};
-
-			injectionItems.Add(typeof(ICompleteOsmGeo[]), new ICompleteOsmGeo[][] { ((OsmCompleteStreamSource)injectionItems[typeof(OsmCompleteStreamSource)].First()).ToArray() });
 
 			ILayer?[] layerBuffer = new ILayer?[layerTypes.Count];
 			for (int iteration = 0; layerBuffer.Any(l => l is null) && iteration < layerBuffer.Length; ++iteration)
@@ -209,7 +207,7 @@ public partial class MainPage : ContentPage
 						continue;
 
 					object?[] cArgs = new object?[constructor.GetParameters().Length];
-					Dictionary<Type, int> counts = new();
+					Dictionary<Type, int> counts = [];
 					foreach (var t in constructor.GetParameters().Select(p => injectionItems.ContainsKey(p.ParameterType) ? p.ParameterType : p.ParameterType.GetElementType() ?? typeof(void)))
 						counts[t] = 0;
 
@@ -228,11 +226,11 @@ public partial class MainPage : ContentPage
 
 					ILayer newLayer = (ILayer)constructor.Invoke(cArgs);
 
-					List<KeyboardAccelerator> addAccels = new();
+					List<KeyboardAccelerator> addAccels = [];
 					if (cArgs.Any(a => a is KeyboardAccelerator))
 						addAccels.AddRange(cArgs.Where(a => a is KeyboardAccelerator).Cast<KeyboardAccelerator>());
 
-					if (newLayer.GetType().GetMethod("GetAccelerator") is MethodInfo mi && mi.ReturnType == typeof(KeyboardAccelerator) && !mi.GetParameters().Any())
+					if (newLayer.GetType().GetMethod("GetAccelerator") is MethodInfo mi && mi.ReturnType == typeof(KeyboardAccelerator) && mi.GetParameters().Length == 0)
 						addAccels.Add(await MainThread.InvokeOnMainThreadAsync(() => (KeyboardAccelerator)mi.Invoke(newLayer, null)!));
 
 					foreach (var accel in addAccels)
@@ -246,7 +244,7 @@ public partial class MainPage : ContentPage
 					layerBuffer[layerIdx] = newLayer;
 
 					if (injectionItems.TryGetValue(newLayer.GetType(), out object[]? old))
-						injectionItems[newLayer.GetType()] = old.Append(newLayer).ToArray();
+						injectionItems[newLayer.GetType()] = [.. old, newLayer];
 					else
 						injectionItems.Add(newLayer.GetType(), new[] { newLayer });
 				}
@@ -275,6 +273,17 @@ public partial class MainPage : ContentPage
 		doubleClickRecognizer.Tapped += (_, e) =>
 			ScopeClicked(ILayer.ClickType.Double | ILayer.ClickType.Left, e.GetPosition(GvwScope)!.Value);
 		GvwScope.GestureRecognizers.Add(doubleClickRecognizer);
+
+		// Invalidate regularly to permit a consistent refresh.
+		Task.Run(async () =>
+		{
+			await Task.Delay(2500);
+			while (true)
+			{
+				GvwScope.Invalidate();
+				await Task.Delay(500);
+			}
+		});
 	}
 
 	Microsoft.UI.Xaml.Controls.Control? scopeControl;
@@ -308,7 +317,7 @@ public partial class MainPage : ContentPage
 		GvwScope.Invalidate();
 	}
 
-	readonly List<KeyboardAccelerator> _accelerators = new();
+	readonly List<KeyboardAccelerator> _accelerators = [];
 	private IEnumerable<KeyboardAccelerator> GetAccelerators()
 	{
 		foreach (var accel in _accelerators)
@@ -318,67 +327,118 @@ public partial class MainPage : ContentPage
 		locker.Invoked += (_, _) => _scope.MagVarLocked = !_scope.MagVarLocked;
 		yield return locker;
 
+		KeyboardAccelerator texter = new() { Modifiers = Windows.System.VirtualKeyModifiers.Control, Key = Windows.System.VirtualKey.Tab };
+		texter.Invoked += (_, _) =>
+			Task.Run(async () =>
+			{
+				Entry frequency = new() { Text = "123.45", Keyboard = Keyboard.Numeric };
+				Entry input = new() { Placeholder = "Message", HorizontalOptions = LayoutOptions.Fill };
+
+				Grid g = new() {
+					RowDefinitions = {
+						new RowDefinition()
+					},
+					ColumnDefinitions = {
+						new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+						new ColumnDefinition { Width = new GridLength(4, GridUnitType.Star) }
+					},
+					ColumnSpacing = 6,
+					HorizontalOptions = LayoutOptions.Fill
+				};
+
+				g.Add(frequency, 0);
+				g.Add(input, 1);
+
+				Popup p = new() {
+					Content = g
+				};
+
+				frequency.Completed += (_, _) => input.Focus();
+				input.Completed += (_, _) => p.Close((frequency.Text, input.Text));
+
+				if (await MainThread.InvokeOnMainThreadAsync(async () => await this.ShowPopupAsync(p)) is (string freq, string text))
+				{
+					var conn = ((ServerSelector)_scope.First(l => l is ServerSelector)).Connection;
+
+					if (decimal.TryParse(freq, out var f))
+						await conn.SendChannelTextAsync(f, text);
+					else if (freq.ToUpperInvariant() is "KILL" or "!" && conn.GetGuidsFromCallsign(text) is Guid[] victims && victims.Length > 0)
+						await Task.WhenAll(victims.Select(g => conn.SendKillAsync(g)));
+					else if (conn.GetGuidsFromCallsign(freq) is Guid[] recipients && recipients.Length > 0)
+						await Task.WhenAll(recipients.Select(r => conn.SendTextAsync(r, text)));
+				}
+			});
+		yield return texter;
+
 		KeyboardAccelerator finder = new() { Modifiers = Windows.System.VirtualKeyModifiers.Control, Key = Windows.System.VirtualKey.F };
 		finder.Invoked += (_, _) =>
-				Task.Run(async () =>
-				{
-					Entry searchBox = new() { Placeholder = "Query" };
-					DataTemplate resultTemplate = new();
+			Task.Run(async () =>
+			{
+				Entry searchBox = new() { Placeholder = "Query" };
+				DataTemplate resultTemplate = new();
 
-					Action<object?>? kill = null;
+				Action<object?>? kill = null;
 
-					ListView results = new() {
-						ItemsSource = QueryResults,
+				ListView results = new() {
+					ItemsSource = QueryResults,
 
-						ItemTemplate = new DataTemplate(() =>
-						{
-							TextCell retval = new();
-							retval.SetBinding(TextCell.TextProperty, "Name");
-							retval.SetBinding(TextCell.DetailProperty, "Centerpoint");
-							retval.Tapped += (_, _) => kill?.Invoke(((SearchResult)retval.BindingContext).Centerpoint);
+					ItemTemplate = new DataTemplate(() =>
+					{
+						TextCell retval = new();
+						retval.SetBinding(TextCell.TextProperty, "Name");
+						retval.SetBinding(TextCell.DetailProperty, "Centerpoint");
+						retval.Tapped += (_, _) => kill?.Invoke(((SearchResult)retval.BindingContext).Centerpoint);
 
-							return retval;
-						}),
+						return retval;
+					}),
 
-						HorizontalScrollBarVisibility = ScrollBarVisibility.Always
-					};
+					HorizontalScrollBarVisibility = ScrollBarVisibility.Always
+				};
 
-					searchBox.TextChanged += (_, e) => { results.BeginRefresh(); Search(e.NewTextValue); results.EndRefresh(); };
+				searchBox.TextChanged += (_, e) => { results.BeginRefresh(); Search(e.NewTextValue); results.EndRefresh(); };
 
-					Popup p = new() {
-						Content = new ScrollView() {
-							Content = new VerticalStackLayout() {
-								searchBox,
-								results
-							}
+				Popup p = new() {
+					Content = new ScrollView() {
+						Content = new VerticalStackLayout() {
+							searchBox,
+							results
 						}
-					};
-					kill = p.Close;
+					}
+				};
+				kill = p.Close;
 
-					var res = await MainThread.InvokeOnMainThreadAsync(async () => await this.ShowPopupAsync(p));
+				var res = await MainThread.InvokeOnMainThreadAsync(async () => await this.ShowPopupAsync(p));
 
-					if (res is Coordinate c)
-						_scope.Teleport(c);
-				});
+				if (res is Coordinate c)
+					_scope.Teleport(c);
+			});
 		yield return finder;
 	}
 
-	private ObservableCollection<SearchResult> QueryResults { get; } = new(new() { new("No results found", null) });
+	private ObservableCollection<SearchResult> QueryResults { get; } = new([new("No results found", null)]);
 	private record SearchResult(string Name, Coordinate? Centerpoint) { }
 
 	void Search(string query)
 	{
-		Regex iq = new("^" + query, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled),
-			  rq = new(query, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+		try
+		{
+			Regex iq = new("^" + query, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled),
+				  rq = new(query, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
-		var results = _scope.SelectMany(l => l.Find(iq)).OrderBy(v => _scope.Centerpoint.DistanceTo(v.Centerpoint)).Concat(_scope.SelectMany(l => l.Find(rq)).OrderBy(v => _scope.Centerpoint.DistanceTo(v.Centerpoint))).Distinct().Take(50).ToArray();
-		QueryResults.Clear();
+			var results = _scope.SelectMany(l => l.Find(iq)).OrderBy(v => _scope.Centerpoint.DistanceTo(v.Centerpoint)).Concat(_scope.SelectMany(l => l.Find(rq)).OrderBy(v => _scope.Centerpoint.DistanceTo(v.Centerpoint))).Distinct().Take(50).ToArray();
+			QueryResults.Clear();
 
-		if (!results.Any())
-			QueryResults.Add(new("No results found", null));
-		else
-			foreach (var (name, centerpoint) in results)
-				QueryResults.Add(new(name, centerpoint));
+			if (results.Length == 0)
+				QueryResults.Add(new("No results found", null));
+			else
+				foreach (var (name, centerpoint) in results)
+					QueryResults.Add(new(name, centerpoint));
+		}
+		catch (RegexParseException)
+		{
+			QueryResults.Clear();
+			QueryResults.Add(new("Invalid regex", null));
+		}
 	}
 
 	internal void ScopeClicked(ILayer.ClickType clickType, PointF position)
@@ -392,3 +452,7 @@ public partial class MainPage : ContentPage
 	}
 }
 
+internal static class GeoExtensions
+{
+	public static GeoAPI.Geometries.IPoint ToPoint(this OsmSharp.Node n) => new NetTopologySuite.Geometries.Point(n.Longitude ?? 0, n.Latitude ?? 0);
+}

@@ -48,6 +48,8 @@ public record struct Coordinate(float Latitude, float Longitude)
 			Longitude *= -1;
 	}
 
+	public static implicit operator Coordinate(TrainingServer.Extensibility.Coordinate c) => new(c.Latitude, c.Longitude);
+
 	public readonly PointF ToPoint() => new(Longitude, Latitude);
 
 	[JsonIgnore]
@@ -309,8 +311,10 @@ public static class Extensions
 		if (!cache.Any())
 			return new();
 
+#pragma warning disable IDE0042 // Deconstruct variable declaration
 		var tv = cache.Aggregate((s, i) => (s.Latitude + i.Latitude, s.Longitude + i.Longitude));
 		return new(tv.Latitude / cache.Length, tv.Longitude / cache.Length);
+#pragma warning restore IDE0042 // Deconstruct variable declaration
 	}
 
 	public static IEnumerable<Coordinate> ToCoordinates(this IEnumerable<OsmSharp.Node> nodes) => nodes.Select(n => (Coordinate)n);

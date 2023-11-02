@@ -2,6 +2,8 @@
 
 using System.Text.RegularExpressions;
 
+using AC = TrainingServer.Extensibility.Aircraft;
+
 namespace Borealis.Layers;
 public class LiveRoutes : ILayer
 {
@@ -27,24 +29,24 @@ public class LiveRoutes : ILayer
 		canvas.StrokeColor = _strokeColors.Route;
 		canvas.FontColor = _labelColors.Route;
 
-		foreach (Data.Aircraft ac in _aircraft.Selected)
+		foreach (AC ac in _aircraft.Selected)
 		{
-			string routeName = $"{ac.Route.Origin}→{ac.Route.Destination}";
+			string routeName = $"{ac.Metadata.Origin}→{ac.Metadata.Destination}";
 			Queue<string> segments = new();
 
-			segments.Enqueue(ac.Route.Origin);
+			segments.Enqueue(ac.Metadata.Origin);
 
-			foreach (string step in ac.Route.Route.ToUpperInvariant().Split().SelectMany(s => s.Trim().Split('.')))
+			foreach (string step in ac.Metadata.Route.ToUpperInvariant().Split().SelectMany(s => s.Trim().Split('.')))
 				segments.Enqueue(step);
 
-			segments.Enqueue(ac.Route.Destination);
+			segments.Enqueue(ac.Metadata.Destination);
 
-			if (_cifp.Aerodromes.TryGetValue(ac.Route.Origin, out var orA) && _cifp.Aerodromes.TryGetValue(ac.Route.Destination, out var arA) && orA.Location.Longitude > arA.Location.Longitude)
-				routeName = $"{ac.Route.Destination}←{ac.Route.Origin}";
+			if (_cifp.Aerodromes.TryGetValue(ac.Metadata.Origin, out var orA) && _cifp.Aerodromes.TryGetValue(ac.Metadata.Destination, out var arA) && orA.Location.Longitude > arA.Location.Longitude)
+				routeName = $"{ac.Metadata.Destination}←{ac.Metadata.Origin}";
 
-			Route drawRoute = new($"{routeName} ({ac.Callsign})");
-			string lastName = ac.Route.Origin;
-			Coordinate lastPoint = _cifp.Aerodromes.TryGetValue(ac.Route.Origin, out var originAp) ? originAp.Location.GetCoordinate() : new();
+			Route drawRoute = new($"{routeName} ({ac.Metadata.Callsign})");
+			string lastName = ac.Metadata.Origin;
+			Coordinate lastPoint = _cifp.Aerodromes.TryGetValue(ac.Metadata.Origin, out var originAp) ? originAp.Location.GetCoordinate() : new();
 			CIFPReader.Procedure? queuedProc = null;
 			CIFPReader.Airway? queuedAirway = null;
 

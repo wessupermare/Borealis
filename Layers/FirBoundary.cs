@@ -21,7 +21,7 @@ public class FirBoundary : ILayer
 
 	public FirBoundary(Colorscheme color, Route[] borders)
 	{
-		(_color, _borders) = (color, new());
+		(_color, _borders) = (color, []);
 
 		foreach (Route border in borders)
 		{
@@ -33,7 +33,7 @@ public class FirBoundary : ILayer
 
 			Route simplifiedBorder = new(border.Name);
 
-			HashSet<Coordinate> otherLabels = new();
+			HashSet<Coordinate> otherLabels = [];
 
 			var pts = border.LabelledPoints.ToArray();
 			for (int ptIdx = 0; ptIdx < pts.Length; ++ptIdx)

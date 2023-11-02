@@ -1,5 +1,8 @@
 ﻿using Borealis.Data;
 
+using OsmSharp.Complete;
+using OsmSharp.Streams.Complete;
+
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
@@ -21,7 +24,7 @@ public class ServerSelector : ILayer
 
 	readonly Scope _scope;
 
-	ImmutableArray<ServerInfo> _servers = new();
+	ImmutableArray<ServerInfo> _servers = [];
 
 	public ServerSelector(Scope scope, string endpoint)
 	{
@@ -54,6 +57,9 @@ public class ServerSelector : ILayer
 	{
 		tr.FillColor = new();
 		tr.FillCanvas();
+
+		if (!_servers.Any())
+			return;
 
 		float hp = _scope.LastBoundingRect?.Height / 100 ?? 10,
 			  wp = _scope.LastBoundingRect?.Width / 100 ?? 20;
@@ -88,20 +94,14 @@ public class ServerSelector : ILayer
 		{
 			if ((await Connection.ListServersAsync())?.ToArray() is ServerInfo[] servers)
 			{
-				_servers.Clear();
-
-				List<ServerInfo> s = new();
-				foreach (ServerInfo server in servers)
-				{
-					s.Add(server);
-					s.Add(new(Guid.NewGuid(), server.ReadableName + " fake clone"));
-				}
-
-				_servers = s.ToImmutableArray();
+				_servers = [.. servers];
 				OnInvalidating?.Invoke();
 			}
 
 			await Task.Delay(TimeSpan.FromSeconds(5));
 		}
 	}
+	
+	public async Task<OsmCompleteStreamSource> GetOsmGeosAsync() =>
+		new OsmCompleteEnumerableStreamSource(await Connection.GetOsmGeosAsync());
 }
